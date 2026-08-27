@@ -1,7 +1,10 @@
 # Never commit the Discord webhook URL — anyone holding it can post to your channel.
 secrets.local.json
 
-# Local runtime noise
+# Local runtime noise. state.json is per-environment: the Windows task keeps its
+# own, and CI restores its own from the Actions cache. Committing it would mean a
+# dirty tree after every local run, and merge conflicts between the two.
+state.json
 restock.log
 .lock
 items.json.bak

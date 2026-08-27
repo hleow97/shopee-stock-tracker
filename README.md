@@ -166,6 +166,37 @@ Run this after editing `tracker.js`, and whenever `restock.log` starts showing
 `product payload not found` — that means Shopee changed their page structure and
 the fixtures need refreshing alongside the parser.
 
+## Running it on GitHub Actions (no PC required)
+
+The Windows task only runs while this machine is awake. GitHub Actions runs it
+in the cloud, alerting through Discord alone — no toast, no browser tab.
+
+**Use a public repo.** Private repos get 2,000 free Actions minutes/month, and a
+15-minute cadence burns roughly 2,880 — you would hit the cap. Public repos get
+unlimited minutes. Nothing sensitive is committed: the webhook lives in
+`secrets.local.json` (gitignored) locally and in an Actions secret in CI.
+
+1. Create a **public** repo on GitHub, e.g. `shopee-stock-tracker`.
+2. Push this folder to it (see the commands in the setup section below).
+3. In the repo: **Settings → Secrets and variables → Actions → New repository
+   secret**, named `SHOPEE_WEBHOOK_URL`, holding your Discord webhook URL.
+4. Optionally add a **variable** (not secret) `SHOPEE_WEBHOOK_MENTION` set to
+   `@everyone`; it defaults to `@everyone` if unset.
+5. **Actions** tab → *Shopee restock check* → **Run workflow** to verify.
+
+Things to know:
+
+- **Cron is best-effort.** GitHub often delays scheduled runs 5–15 minutes under
+  load. Fine for a pre-order, not for a flash sale.
+- **State lives in the Actions cache**, not in commits, so the repo isn't spammed
+  with a commit every 15 minutes. If the cache is evicted the tracker
+  re-baselines — worst case one extra alert for something already in stock,
+  which is the safe direction to fail.
+- **Scheduled workflows are disabled after 60 days** of repo inactivity. Push any
+  commit to re-enable.
+- Running both this and the Windows task means **two alerts** per restock, since
+  they keep separate state. Keep both for redundancy, or disable one.
+
 ## Files
 
 - `tracker.js` — the tracker
