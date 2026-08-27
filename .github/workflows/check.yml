@@ -1,3 +1,4 @@
+# Checks Shopee listings and alerts via Discord when one becomes purchasable.
 name: Shopee restock check
 
 on:
