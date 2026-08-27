@@ -1,0 +1,55 @@
+name: Shopee restock check
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub's scheduler is best-effort and often runs late
+    # under load — fine for a pre-order, not for a flash sale.
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+# Never let two checks overlap; they would both alert on the same restock.
+concurrency:
+  group: shopee-restock
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # State carries "was it available last time?" between runs, which is what
+      # makes this alert on the transition instead of every 15 minutes forever.
+      # If the cache is ever lost, the tracker re-baselines: worst case it sends
+      # one extra alert for something already in stock, which is the safe way
+      # to fail.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: shopee-state-${{ github.run_id }}
+          restore-keys: |
+            shopee-state-
+
+      - name: Check listings
+        env:
+          SHOPEE_WEBHOOK_URL: ${{ secrets.SHOPEE_WEBHOOK_URL }}
+          SHOPEE_WEBHOOK_MENTION: ${{ vars.SHOPEE_WEBHOOK_MENTION || '@everyone' }}
+        run: node tracker.js
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: shopee-state-${{ github.run_id }}
+
+      - name: Show log
+        if: always()
+        run: cat restock.log || true

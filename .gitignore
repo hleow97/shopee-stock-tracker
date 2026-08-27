@@ -1,0 +1,8 @@
+# Never commit the Discord webhook URL — anyone holding it can post to your channel.
+secrets.local.json
+
+# Local runtime noise
+restock.log
+.lock
+items.json.bak
+node_modules/
