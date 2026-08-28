@@ -166,6 +166,47 @@ Run this after editing `tracker.js`, and whenever `restock.log` starts showing
 `product payload not found` — that means Shopee changed their page structure and
 the fixtures need refreshing alongside the parser.
 
+## P-Bandai (Premium Bandai) items
+
+P-Bandai listings are watched too, via `site: "pbandai"` entries in `items.json`.
+They work completely differently from Shopee and need `playwright` installed:
+
+```bash
+npm install playwright && npx playwright install chromium chromium-headless-shell
+```
+
+**Why a browser is needed.** A plain HTTP fetch of a P-Bandai product page
+returns only a shell: no `PRELOAD_DATA`, not even the product code. Their JSON
+endpoints answer 500 without server-side context, and hitting them directly
+returns a 503 `NETWORK CONGESTION` waiting room within a couple of requests.
+The site runs Akamai Bot Manager. Only a real browser session sees stock.
+
+**The signal.** Confirmed against live sold-out listings:
+
+```html
+<button class="p-button p-button--red is-noActive">SORRY, OUT OF STOCK</button>
+```
+
+`is-noActive` marks it unbuyable, and the quantity steppers are `disabled`
+alongside it.
+
+**Important caveat, stated plainly:** the *buyable* markup is **unverified**.
+P-Bandai IP-blocked the attempt to confirm it against an in-stock listing. The
+detector therefore does not trust any single class - it treats an item as
+available if it finds enabled ADD TO CART / BUY NOW / PRE-ORDER NOW text, or a
+red button without `is-noActive`, or enabled quantity steppers. If a real
+restock ever fails to alert, this is the first thing to re-check.
+
+**Rate limiting is real.** These items carry `minIntervalMinutes: 60`, so they
+are checked hourly even though the scheduler fires every 15 minutes. Do not
+lower this. Being blocked shows up in `restock.log` as `P-Bandai served a
+block/waiting-room page`, and is treated as a failed check - never as "sold
+out", so it cannot cause a false alert or clear a known state.
+
+**Not usable from CI.** GitHub runners are datacenter IPs and get the block page,
+so the workflow sets `SHOPEE_TRACKER_SKIP_BROWSER=1` and covers Shopee only.
+P-Bandai coverage comes from the Windows task on a home connection.
+
 ## Running it on GitHub Actions (no PC required)
 
 The Windows task only runs while this machine is awake. GitHub Actions runs it

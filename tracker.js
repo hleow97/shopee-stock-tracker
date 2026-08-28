@@ -203,7 +203,27 @@ function evaluate(payload) {
   };
 }
 
+/** Resolve the public URL for a watch entry, whichever site it belongs to. */
+function watchUrl(watch) {
+  if (watch.site === 'pbandai') {
+    return require('./pbandai.js').itemUrl(watch.itemCode, watch.area);
+  }
+  return productUrl(watch.shopId, watch.itemId);
+}
+
 async function checkItem(watch) {
+  if (watch.site === 'pbandai') {
+    // P-Bandai needs a real browser (Akamai bot protection), which is not
+    // viable from CI datacenter IPs - they get the waiting-room page.
+    if (process.env.SHOPEE_TRACKER_SKIP_BROWSER === '1') {
+      return { ok: false, reason: 'browser check skipped (SHOPEE_TRACKER_SKIP_BROWSER=1)' };
+    }
+    return require('./pbandai.js').checkPBandai(watch);
+  }
+  return checkShopee(watch);
+}
+
+async function checkShopee(watch) {
   const url = productUrl(watch.shopId, watch.itemId);
   let html;
 
@@ -392,12 +412,22 @@ async function runOnceLocked(config, options) {
     const watch = config.items[i];
     const key = watch.id || watch.shopId + '/' + watch.itemId;
     const label = watch.label || key;
-    const url = productUrl(watch.shopId, watch.itemId);
+    const url = watchUrl(watch);
+
+    const previous = state[key] || {};
+
+    // Some sites (P-Bandai) block aggressive polling. Let an item opt into a
+    // slower cadence than the scheduler's, instead of running every pass.
+    if (watch.minIntervalMinutes && previous.lastCheckedAt) {
+      const sinceMs = Date.now() - new Date(previous.lastCheckedAt).getTime();
+      if (sinceMs < watch.minIntervalMinutes * 60 * 1000) {
+        continue;
+      }
+    }
 
     if (i > 0) await sleep(2000 + Math.floor(Math.random() * 3000)); // be polite
 
     const result = await checkItem(watch);
-    const previous = state[key] || {};
 
     if (!result.ok) {
       // Never let a fetch failure flip or clear a known state.
@@ -496,7 +526,7 @@ async function main() {
     const key = watch.id || watch.shopId + '/' + watch.itemId;
     const saved = (readJson(STATE_FILE, {}) || {})[key] || {};
     const title = saved.title || watch.label || key;
-    const url = productUrl(watch.shopId, watch.itemId);
+    const url = watchUrl(watch);
 
     console.log('Previewing the alert for: ' + (watch.label || key));
     console.log('');
@@ -532,7 +562,7 @@ async function main() {
 
     const watch = config.items && config.items[0];
     const sample = watch
-      ? { title: watch.label, url: productUrl(watch.shopId, watch.itemId) }
+      ? { title: watch.label, url: watchUrl(watch) }
       : { title: 'Test item', url: 'https://shopee.com.my' };
 
     console.log('Posting a test message to the configured webhook...');

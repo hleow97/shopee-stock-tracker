@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      # Offline assertions against saved page fixtures — no network, no alerts.
+          node-version: '22'
+      # Offline assertions against saved page fixtures - no network, no alerts.
       # Catches a broken parser before it silently reports "not purchasable"
       # forever.
       - run: node test-tracker.js

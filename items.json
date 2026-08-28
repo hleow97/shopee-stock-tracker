@@ -1,27 +1,45 @@
 {
-  "webhookUrl": null,
-  "webhookMention": null,
-  "items": [
-    {
-      "id": "onepiece-day26-premium-collection",
-      "label": "One Piece Premium Card Collection -ONE PIECE DAY'26- (Dec 2026)",
-      "shopId": "435791627",
-      "itemId": "55366324866",
-      "openBrowserOnRestock": true
-    },
-    {
-      "id": "onepiece-4th-anniversary-set",
-      "label": "One Piece Card Game 4th Anniversary Set (Mar 2027)",
-      "shopId": "435791627",
-      "itemId": "54965355390",
-      "openBrowserOnRestock": true
-    },
-    {
-      "id": "gundam-1st-anniversary-set",
-      "label": "Gundam Card Game 1st Anniversary Set (Feb 2027)",
-      "shopId": "435791627",
-      "itemId": "57314039530",
-      "openBrowserOnRestock": true
-    }
-  ]
+    "webhookUrl":  null,
+    "webhookMention":  null,
+    "items":  [
+                  {
+                      "id":  "onepiece-day26-premium-collection",
+                      "label":  "One Piece Premium Card Collection -ONE PIECE DAY\u002726- (Dec 2026)",
+                      "shopId":  "435791627",
+                      "itemId":  "55366324866",
+                      "openBrowserOnRestock":  true
+                  },
+                  {
+                      "id":  "onepiece-4th-anniversary-set",
+                      "label":  "One Piece Card Game 4th Anniversary Set (Mar 2027)",
+                      "shopId":  "435791627",
+                      "itemId":  "54965355390",
+                      "openBrowserOnRestock":  true
+                  },
+                  {
+                      "id":  "gundam-1st-anniversary-set",
+                      "label":  "Gundam Card Game 1st Anniversary Set (Feb 2027)",
+                      "shopId":  "435791627",
+                      "itemId":  "57314039530",
+                      "openBrowserOnRestock":  true
+                  },
+                  {
+                      "id":  "pbandai-day26-premium-collection",
+                      "label":  "P-BANDAI SG: One Piece Premium Card Collection -ONE PIECE DAY\u002726-",
+                      "site":  "pbandai",
+                      "area":  "sg",
+                      "itemCode":  "A2866729001",
+                      "openBrowserOnRestock":  true,
+                      "minIntervalMinutes":  60
+                  },
+                  {
+                      "id":  "pbandai-4th-anniversary-set",
+                      "label":  "P-BANDAI SG: One Piece Card Game 4th Anniversary Set",
+                      "site":  "pbandai",
+                      "area":  "sg",
+                      "itemCode":  "A2866726001",
+                      "openBrowserOnRestock":  true,
+                      "minIntervalMinutes":  60
+                  }
+              ]
 }

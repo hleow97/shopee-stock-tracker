@@ -1,0 +1,24 @@
+{
+  "name": "shopee-stock-tracker",
+  "version": "1.0.0",
+  "description": "Watches Shopee listings and alerts you when one flips from **not purchasable** to **purchasable**. No login, no cookies, no API key.",
+  "main": "test-tracker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hleow97/shopee-stock-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hleow97/shopee-stock-tracker/issues"
+  },
+  "homepage": "https://github.com/hleow97/shopee-stock-tracker#readme",
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

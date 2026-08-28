@@ -4,9 +4,18 @@ name: Shopee restock check
 on:
   schedule:
     # Every 15 minutes. GitHub's scheduler is best-effort and often runs late
-    # under load — fine for a pre-order, not for a flash sale.
+    # under load - fine for a pre-order, not for a flash sale.
     - cron: '*/15 * * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'check = normal run; test-webhook = prove Discord delivery'
+        required: false
+        default: check
+        type: choice
+        options:
+          - check
+          - test-webhook
 
 # Never let two checks overlap; they would both alert on the same restock.
 concurrency:
@@ -23,7 +32,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       # State carries "was it available last time?" between runs, which is what
       # makes this alert on the transition instead of every 15 minutes forever.
@@ -42,7 +51,17 @@ jobs:
         env:
           SHOPEE_WEBHOOK_URL: ${{ secrets.SHOPEE_WEBHOOK_URL }}
           SHOPEE_WEBHOOK_MENTION: ${{ vars.SHOPEE_WEBHOOK_MENTION || '@everyone' }}
-        run: node tracker.js
+          MODE: ${{ inputs.mode || 'check' }}
+          # P-Bandai needs a real browser and blocks datacenter IPs outright,
+          # so cloud runs cover the Shopee listings only. The Windows task on
+          # the home connection handles the P-Bandai items.
+          SHOPEE_TRACKER_SKIP_BROWSER: '1'
+        run: |
+          if [ "$MODE" = "test-webhook" ]; then
+            node tracker.js --test-webhook
+          else
+            node tracker.js
+          fi
 
       - name: Save state
         if: always()
